@@ -38,9 +38,9 @@ pw: foo123!
 
 #### UI's you'll want to play around with
  
- - OpsCenter: http://104.44.136.232:8888/opscenter/index.html
- - Spark Master: http://104.44.132.40:7080/
- - Solr UI: http://104.44.136.232:8983/solr/#/
+ - OpsCenter: http://168.62.237.186:8888/opscenter/index.html
+ - Spark Master: http://168.62.235.221:7080/
+ - Solr UI: http://168.62.235.29:8983/solr/#/
 
 
 ----------
