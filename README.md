@@ -74,17 +74,17 @@ cqlsh
 
 Let's make our first Cassandra Keyspace!
 ```
-CREATE KEYSPACE amp_event WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 3 };
+CREATE KEYSPACE training WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 3 };
 ```
 
-And just like that, any data within any table you create in the amp_event keyspace will automatically be replicated 3 times. 
+And just like that, any data within any table you create in the training keyspace will automatically be replicated 3 times. 
 
 > **Hint** - SimpleStrategy is OK for a cluster using a single data center, but in the real world with multiple datacenters you would use the ```NetworkTopologyStrategy``` replication strategy. In fact, even if you start out on your development path with just a single data center, if there is even a chance that you might go to multiple data centers in the future, then you should use NetworkTopologyStrategy from the outset.
 
 Let's keep going and create ourselves a table. You can follow my example or be a rebel and roll your own. 
 
 ```
-CREATE TABLE amp_event.sales (
+CREATE TABLE training.sales (
 	name text,
 	time int,
 	item text,
@@ -96,19 +96,19 @@ CREATE TABLE amp_event.sales (
 Let's get some data into your table! Cut and paste these inserts into CQLSH. Feel free to insert your own data values, as well. 
 
 ```
-INSERT INTO amp_event.sales (name, time, item, price) VALUES ('marc', 20150205, 'Apple Watch', 299.00);
-INSERT INTO amp_event.sales (name, time, item, price) VALUES ('marc', 20150204, 'Apple iPad', 999.00);
-INSERT INTO amp_event.sales (name, time, item, price) VALUES ('rich', 20150206, 'Music Man Stingray Bass', 1499.00);
-INSERT INTO amp_event.sales (name, time, item, price) VALUES ('marc', 20150207, 'Jimi Hendrix Stratocaster', 899.00);
-INSERT INTO amp_event.sales (name, time, item, price) VALUES ('rich', 20150208, 'Santa Cruz Tallboy 29er', 4599.00);
+INSERT INTO training.sales (name, time, item, price) VALUES ('marc', 20150205, 'Apple Watch', 299.00);
+INSERT INTO training.sales (name, time, item, price) VALUES ('marc', 20150204, 'Apple iPad', 999.00);
+INSERT INTO training.sales (name, time, item, price) VALUES ('rich', 20150206, 'Music Man Stingray Bass', 1499.00);
+INSERT INTO training.sales (name, time, item, price) VALUES ('marc', 20150207, 'Jimi Hendrix Stratocaster', 899.00);
+INSERT INTO training.sales (name, time, item, price) VALUES ('rich', 20150208, 'Santa Cruz Tallboy 29er', 4599.00);
 ```
 
-At the moment we're prefixing the keyspace name to the table name in our CQL commands e.g. ```amp_event.sales```.
+At the moment we're prefixing the keyspace name to the table name in our CQL commands e.g. ```training.sales```.
 
 Let's make it a little easier - we can set our ***default*** keyspace so that we dont need to type it in every time.
 
 ```
-use amp_event;
+use training;
 ```
 You can check the tables that are in that keyspace like this:
 ```
@@ -172,7 +172,7 @@ consistency all
 Let's do a **SELECT** statement to see the effects:
 
 ```
-SELECT * FROM amp_event.sales where name='rich';
+SELECT * FROM training.sales where name='rich';
 ```
 
 How did we do? On my test cluster, I received the expected two results in 6530 microseconds:
@@ -192,7 +192,7 @@ consistency local_quorum
 Let's try the **SELECT** statement again. Any changes in latency? Again I received the expected two results, but this time in 4448 microseconds:
 
 ```
-SELECT * FROM amp_event.sales where name='rich';
+SELECT * FROM training.sales where name='rich';
 ```
 
 ```
@@ -210,7 +210,7 @@ consistency local_one
 ```
 
 ```
-SELECT * FROM amp_event.sales where name='rich';
+SELECT * FROM training.sales where name='rich';
 ```
 
 Only needing to receive an acknowledgement from one node dropped our query response time to 778 microseconds:
@@ -236,7 +236,7 @@ DSE Search is awesome. You can configure which columns of which Cassandra tables
 Let's start off by indexing the tables we've already made. Here's where the dsetool really comes in handy:
 
 ```
-dsetool create_core amp_event.sales generateResources=true reindex=true
+dsetool create_core training.sales generateResources=true reindex=true
 ```
 
 >If you've ever created your own Solr cluster, you know you need to create the core and upload a schema and config.xml. That **generateResources** tag does that for you. For production use, you'll want to take the resources and edit them to your needs but it does save you a few steps. 
@@ -244,7 +244,7 @@ dsetool create_core amp_event.sales generateResources=true reindex=true
 This by default will map Cassandra types to Solr types for you. Anyone familiar with Solr knows that there's a REST API for querying data. In DSE Search, we embed that into CQL so you can take advantage of all the goodness CQL brings. Let's give it a shot. 
 
 ```
-SELECT * FROM amp_event.sales WHERE solr_query='{"q":"name:*"}';
+SELECT * FROM training.sales WHERE solr_query='{"q":"name:*"}';
 ```
 
 Your output will look like this:
@@ -264,7 +264,7 @@ Your output will look like this:
 Now let's try a filter query to return only the items purchased by Marc from Apple:
 
 ```
-SELECT * FROM amp_event.sales WHERE solr_query='{"q":"name:marc", "fq":"item:*pple*"}';
+SELECT * FROM training.sales WHERE solr_query='{"q":"name:marc", "fq":"item:*pple*"}';
 
  name | time     | item        | price | solr_query
 ------+----------+-------------+-------+------------
@@ -277,7 +277,7 @@ SELECT * FROM amp_event.sales WHERE solr_query='{"q":"name:marc", "fq":"item:*pp
 We can also now control how the data is sorted based on a column value:
 
 ```
-SELECT * FROM amp_event.sales WHERE solr_query='{"q":"name:marc", "fq":"item:*pple*", "sort":"price desc"}';
+SELECT * FROM training.sales WHERE solr_query='{"q":"name:marc", "fq":"item:*pple*", "sort":"price desc"}';
 
  name | time     | item        | price | solr_query
 ------+----------+-------------+-------+------------
@@ -378,7 +378,7 @@ dse spark-sql
 Try some CQL commands
 
 ```
-use amp_event;
+use training;
 ```
 
 And something not too familiar in CQL...
